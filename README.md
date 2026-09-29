@@ -38,4 +38,4 @@ print("output:", [y[i] for i in range(y.size())])
 1. Clone Respository
 2. Run premake5
 3. Build Solution (Visual Studio Recommended)
-4. Run the exam0ple python script in the scripts directory
+4. Run the example python script in the scripts directory
