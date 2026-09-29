@@ -4,6 +4,9 @@
 local py_include = os.outputof("python -c \"import sysconfig; print(sysconfig.get_paths()['include'])\"")
 local py_libdir  = os.outputof("python -c \"import sysconfig; print(sysconfig.get_config_var('installed_base') + '\\\\libs')\"")
 
+print("py_include = [" .. py_include .. "]")
+print("py_libdir  = [" .. py_libdir .. "]")
+
 workspace "synaption"
     configurations { "Debug", "Release" }
     platforms { "x64" }
@@ -36,9 +39,8 @@ project "synaption_core"
 
     filter "system:windows"
         systemversion "latest"
-        -- Python debug builds need pythonXY_d.lib; simplest is to always
-        -- link release python libs even in Debug config (standard pybind11 approach)
-        defines { "Py_LIMITED_API=0" }
+
+
 
     filter "configurations:Debug"
         defines { "DEBUG" }
