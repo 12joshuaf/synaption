@@ -10,6 +10,6 @@ for _dir in _candidates:
     if os.path.isdir(_abs):
         sys.path.insert(0, _abs)
 
-from synaption_core import Tensor, Network  # noqa
+from synaption_core import Tensor, Network, Activation, Loss, SGD  # noqa
 
-__all__ = ["Tensor", "Network"]
+__all__ = ["Tensor", "Network", "Activation", "Loss", "SGD"]

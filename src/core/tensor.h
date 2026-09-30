@@ -14,7 +14,10 @@ namespace synaption {
         const std::vector<size_t>& shape() const { return shape_; }
         size_t size() const { return data_.size(); }
 
+        void zero_grad();
+
         std::vector<float> data_;
+        std::vector<float> grad_;
         std::vector<size_t> shape_;
     };
 

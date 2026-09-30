@@ -101,14 +101,20 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\core\activation.h" />
     <ClInclude Include="..\..\src\core\layer.h" />
+    <ClInclude Include="..\..\src\core\loss.h" />
     <ClInclude Include="..\..\src\core\network.h" />
+    <ClInclude Include="..\..\src\core\optimizer.h" />
     <ClInclude Include="..\..\src\core\tensor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\bindings\bindings.cpp" />
+    <ClCompile Include="..\..\src\core\activation.cpp" />
     <ClCompile Include="..\..\src\core\layer.cpp" />
+    <ClCompile Include="..\..\src\core\loss.cpp" />
     <ClCompile Include="..\..\src\core\network.cpp" />
+    <ClCompile Include="..\..\src\core\optimizer.cpp" />
     <ClCompile Include="..\..\src\core\tensor.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

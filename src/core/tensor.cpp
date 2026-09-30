@@ -8,9 +8,12 @@ namespace synaption {
         size_t total = std::accumulate(shape_.begin(), shape_.end(),
             size_t(1), std::multiplies<size_t>());
         data_.assign(total, 0.0f);
+        grad_.assign(total, 0.0f);
     }
 
     float& Tensor::at(size_t i) { return data_[i]; }
     float  Tensor::at(size_t i) const { return data_[i]; }
+
+    void Tensor::zero_grad() { std::fill(grad_.begin(), grad_.end(), 0.0f); }
 
 } // namespace synaption
