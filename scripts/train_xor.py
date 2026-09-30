@@ -5,6 +5,7 @@ from synaption import Tensor, Network, Activation, Loss, SGD
 
 net = Network()
 net.add_layer(2, 4, Activation.Tanh)
+net.add_layer(4, 4, Activation.ReLU)
 net.add_layer(4, 1, Activation.Sigmoid)
 
 def make_tensor(vals):
