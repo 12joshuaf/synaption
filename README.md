@@ -23,6 +23,7 @@ from synaption import Tensor, Network, Activation, Loss, SGD
 #creating neural network
 net = Network()
 net.add_layer(2, 4, Activation.Tanh)
+net.add_layer(4, 4, Activation.ReLU)
 net.add_layer(4, 1, Activation.Sigmoid)
 
 #function to create tensors for training
