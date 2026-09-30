@@ -61,9 +61,9 @@ for x, y in zip(xor_inputs, xor_targets):
 ### Run Instructions for Alpha Version:
 
 1. Clone Respository
-2. Run premake5
+2. Run premake5 in project root
 3. Build Solution (Visual Studio Recommended)
-4. Run the example python script in the scripts directory
+4. Run the example python script in the scripts directory (or create your own)
 
 
 
