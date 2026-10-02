@@ -102,6 +102,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\core\activation.h" />
+    <ClInclude Include="..\..\src\core\error.h" />
     <ClInclude Include="..\..\src\core\layer.h" />
     <ClInclude Include="..\..\src\core\loss.h" />
     <ClInclude Include="..\..\src\core\network.h" />
@@ -111,6 +112,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\bindings\bindings.cpp" />
     <ClCompile Include="..\..\src\core\activation.cpp" />
+    <ClCompile Include="..\..\src\core\error.cpp" />
     <ClCompile Include="..\..\src\core\layer.cpp" />
     <ClCompile Include="..\..\src\core\loss.cpp" />
     <ClCompile Include="..\..\src\core\network.cpp" />

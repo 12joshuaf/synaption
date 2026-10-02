@@ -1,17 +1,27 @@
 #include "loss.h"
+#include "error.h"
 #include <cmath>
 #include <algorithm>
+#include <string>
 
 namespace synaption {
 
-    static constexpr float kEps = 1e-7f;
+static constexpr float kEps = 1e-7f;
 
-    float compute_loss(Loss loss_type, const Tensor& pred, const Tensor& target, Tensor& grad_out) {
-        size_t n = pred.size();
-        grad_out = Tensor(pred.shape());
-        float loss = 0.0f;
+float compute_loss(Loss loss_type, const Tensor& pred, const Tensor& target, Tensor& grad_out) {
+    if (pred.size() == 0)
+        throw_invalid_argument("compute_loss: prediction tensor is empty");
+    if (pred.size() != target.size()) {
+        throw_invalid_argument(
+            "compute_loss: prediction size (" + std::to_string(pred.size()) +
+            ") does not match target size (" + std::to_string(target.size()) + ")");
+    }
 
-        switch (loss_type) {
+    size_t n = pred.size();
+    grad_out = Tensor(pred.shape());
+    float loss = 0.0f;
+
+    switch (loss_type) {
         case Loss::MSE: {
             for (size_t i = 0; i < n; ++i) {
                 float diff = pred.at(i) - target.at(i);
@@ -21,7 +31,7 @@ namespace synaption {
             loss /= float(n);
             break;
         }
-        case Loss::BCE: { // binary cross-entropy, pred expected in (0,1) e.g. after sigmoid
+        case Loss::BCE: {
             for (size_t i = 0; i < n; ++i) {
                 float p = std::clamp(pred.at(i), kEps, 1.0f - kEps);
                 float y = target.at(i);
@@ -31,7 +41,7 @@ namespace synaption {
             loss /= float(n);
             break;
         }
-        case Loss::CCE: { // categorical cross-entropy, pred expected to be a softmax distribution
+        case Loss::CCE: {
             for (size_t i = 0; i < n; ++i) {
                 float p = std::clamp(pred.at(i), kEps, 1.0f);
                 loss += -target.at(i) * std::log(p);
@@ -39,7 +49,7 @@ namespace synaption {
             }
             break;
         }
-        case Loss::Hinge: { // one-vs-rest style hinge, target in {-1, +1}
+        case Loss::Hinge: {
             for (size_t i = 0; i < n; ++i) {
                 float margin = 1.0f - target.at(i) * pred.at(i);
                 loss += std::max(0.0f, margin);
@@ -47,8 +57,8 @@ namespace synaption {
             }
             break;
         }
-        }
-        return loss;
     }
+    return loss;
+}
 
 } // namespace synaption

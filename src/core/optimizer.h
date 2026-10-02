@@ -4,15 +4,15 @@
 
 namespace synaption {
 
-    class SGD {
-    public:
-        explicit SGD(float learning_rate) : lr_(learning_rate) {}
+class SGD {
+public:
+    explicit SGD(float learning_rate);
 
-        void step(std::vector<Tensor*>& params);
-        void zero_grad(std::vector<Tensor*>& params);
+    void step(std::vector<Tensor*>& params);
+    void zero_grad(std::vector<Tensor*>& params);
 
-    private:
-        float lr_;
-    };
+private:
+    float lr_;
+};
 
 } // namespace synaption
