@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "python"))
 from synaption import Tensor, Network, Activation, Loss, SGD
 
 net = Network()
-net.add_layer(2, 4, Activation.Tanh)
+net.add_layer(2, 2, Activation.Tanh)
 net.add_layer(4, 4, Activation.ReLU)
 net.add_layer(4, 1, Activation.Sigmoid)
 
