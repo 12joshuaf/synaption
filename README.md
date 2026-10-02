@@ -2,7 +2,7 @@
 
 ## An Educational Machine Learning Python Module Built with C++
 
-### Current Version: 0.2.1
+### Current Version: 0.2.2
 
 ---
 
