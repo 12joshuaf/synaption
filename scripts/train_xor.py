@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "python"))
 from synaption import Tensor, Network, Activation, Loss, SGD
 
 net = Network()
-net.add_layer(2, 2, Activation.Tanh)
+net.add_layer(2, 4, Activation.Tanh)
 net.add_layer(4, 4, Activation.ReLU)
 net.add_layer(4, 1, Activation.Sigmoid)
 
@@ -20,7 +20,7 @@ xor_targets = [0, 1, 1, 0]
 inputs = [make_tensor(x) for x in xor_inputs]
 targets = [make_tensor([y]) for y in xor_targets]
 
-optimizer = SGD(0.5)
+optimizer = SGD(0.2)
 
 for epoch in range(2000):
     loss = net.train_epoch(inputs, targets, Loss.BCE, optimizer)
