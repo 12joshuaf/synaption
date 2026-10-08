@@ -3,13 +3,15 @@
 
 namespace synaption {
 
-    enum class Activation { Identity, ReLU, Sigmoid, Tanh, Swish, GELU, ELU };
+enum class Activation { Identity, ReLU, Sigmoid, Tanh, Swish, GELU, ELU };
 
-    // Applies activation in place; writes pre-activation values into pre_act (needed for backward)
-    void apply_activation(Activation act, std::vector<float>& x);
+// Scalar versions, used directly inside the per-neuron parallel compute loop.
+float activation_scalar(Activation act, float z);
+float activation_derivative_scalar(Activation act, float z);
 
-    // Given pre-activation values z and upstream grad dL/dy, returns dL/dz (in place into grad)
-    void activation_backward(Activation act, const std::vector<float>& pre_act,
-        std::vector<float>& grad);
+// Vector convenience wrappers (elementwise; kept for any single-threaded/test use).
+void apply_activation(Activation act, std::vector<float>& x);
+void activation_backward(Activation act, const std::vector<float>& pre_act,
+                          std::vector<float>& grad);
 
 } // namespace synaption

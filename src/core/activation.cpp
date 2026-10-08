@@ -4,45 +4,49 @@
 
 namespace synaption {
 
-    static float sigmoid_f(float x) { return 1.0f / (1.0f + std::exp(-x)); }
+static float sigmoid_f(float x) { return 1.0f / (1.0f + std::exp(-x)); }
 
-    void apply_activation(Activation act, std::vector<float>& x) {
-        for (auto& v : x) {
-            switch (act) {
-            case Activation::Identity: break;
-            case Activation::ReLU:     v = std::max(0.0f, v); break;
-            case Activation::Sigmoid:  v = sigmoid_f(v); break;
-            case Activation::Tanh:     v = std::tanh(v); break;
-            case Activation::Swish:    v = v * sigmoid_f(v); break;
-            case Activation::GELU:     v = 0.5f * v * (1.0f + std::tanh(0.7978845608f *
-                (v + 0.044715f * v * v * v))); break;
-            case Activation::ELU:      v = v >= 0.0f ? v : (std::exp(v) - 1.0f); break;
-            }
+float activation_scalar(Activation act, float z) {
+    switch (act) {
+        case Activation::Identity: return z;
+        case Activation::ReLU:     return std::max(0.0f, z);
+        case Activation::Sigmoid:  return sigmoid_f(z);
+        case Activation::Tanh:     return std::tanh(z);
+        case Activation::Swish:    return z * sigmoid_f(z);
+        case Activation::GELU: {
+            float t = std::tanh(0.7978845608f * (z + 0.044715f * z * z * z));
+            return 0.5f * z * (1.0f + t);
         }
+        case Activation::ELU:      return z >= 0.0f ? z : (std::exp(z) - 1.0f);
     }
+    return z;
+}
 
-    void activation_backward(Activation act, const std::vector<float>& pre_act,
-        std::vector<float>& grad) {
-        for (size_t i = 0; i < grad.size(); ++i) {
-            float z = pre_act[i];
-            float d = 1.0f;
-            switch (act) {
-            case Activation::Identity: d = 1.0f; break;
-            case Activation::ReLU:     d = z > 0.0f ? 1.0f : 0.0f; break;
-            case Activation::Sigmoid: { float s = sigmoid_f(z); d = s * (1.0f - s); break; }
-            case Activation::Tanh: { float t = std::tanh(z); d = 1.0f - t * t; break; }
-            case Activation::Swish: { float s = sigmoid_f(z); d = s + z * s * (1.0f - s); break; }
-            case Activation::GELU: {
-                float t = std::tanh(0.7978845608f * (z + 0.044715f * z * z * z));
-                float dt = (1.0f - t * t) * 0.7978845608f * (1.0f + 3.0f * 0.044715f * z * z);
-                d = 0.5f * (1.0f + t) + 0.5f * z * dt;
-                break;
-            }
-            case Activation::ELU:      d = z >= 0.0f ? 1.0f : std::exp(z); break;
-            }
-            grad[i] *= d;
+float activation_derivative_scalar(Activation act, float z) {
+    switch (act) {
+        case Activation::Identity: return 1.0f;
+        case Activation::ReLU:     return z > 0.0f ? 1.0f : 0.0f;
+        case Activation::Sigmoid:  { float s = sigmoid_f(z); return s * (1.0f - s); }
+        case Activation::Tanh:     { float t = std::tanh(z); return 1.0f - t * t; }
+        case Activation::Swish:    { float s = sigmoid_f(z); return s + z * s * (1.0f - s); }
+        case Activation::GELU: {
+            float t = std::tanh(0.7978845608f * (z + 0.044715f * z * z * z));
+            float dt = (1.0f - t * t) * 0.7978845608f * (1.0f + 3.0f * 0.044715f * z * z);
+            return 0.5f * (1.0f + t) + 0.5f * z * dt;
         }
+        case Activation::ELU:      return z >= 0.0f ? 1.0f : std::exp(z);
     }
+    return 1.0f;
+}
 
+void apply_activation(Activation act, std::vector<float>& x) {
+    for (auto& v : x) v = activation_scalar(act, v);
+}
+
+void activation_backward(Activation act, const std::vector<float>& pre_act,
+                          std::vector<float>& grad) {
+    for (size_t i = 0; i < grad.size(); ++i)
+        grad[i] *= activation_derivative_scalar(act, pre_act[i]);
+}
 
 } // namespace synaption

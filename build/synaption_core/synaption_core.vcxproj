@@ -107,6 +107,7 @@
     <ClInclude Include="..\..\src\core\loss.h" />
     <ClInclude Include="..\..\src\core\network.h" />
     <ClInclude Include="..\..\src\core\optimizer.h" />
+    <ClInclude Include="..\..\src\core\parallel.h" />
     <ClInclude Include="..\..\src\core\tensor.h" />
   </ItemGroup>
   <ItemGroup>

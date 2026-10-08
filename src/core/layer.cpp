@@ -1,7 +1,9 @@
 #include "layer.h"
+#include "parallel.h"
 #include "error.h"
 #include <random>
 #include <cmath>
+#include <mutex>
 #include <string>
 
 namespace synaption {
@@ -35,14 +37,19 @@ Tensor Layer::forward(const Tensor& input) {
     Tensor out({out_features_});
     pre_activation_.assign(out_features_, 0.0f);
 
-    for (size_t o = 0; o < out_features_; ++o) {
-        float sum = bias_.at(o);
-        for (size_t i = 0; i < in_features_; ++i)
-            sum += input.at(i) * weights_.at(i * out_features_ + o);
-        pre_activation_[o] = sum;
-        out.at(o) = sum;
-    }
-    apply_activation(activation_, out.data_);
+    // Each output neuron's dot-product is independent of every other, so
+    // neurons are partitioned across threads. No locking needed here: each
+    // thread only ever writes to indices "o" it owns.
+    parallel_for(out_features_, [&](size_t start, size_t end) {
+        for (size_t o = start; o < end; ++o) {
+            float sum = bias_.data_[o];
+            for (size_t i = 0; i < in_features_; ++i)
+                sum += input.data_[i] * weights_.data_[i * out_features_ + o];
+            pre_activation_[o] = sum;
+            out.data_[o] = activation_scalar(activation_, sum);
+        }
+    });
+
     forward_called_ = true;
     return out;
 }
@@ -58,19 +65,31 @@ Tensor Layer::backward(const Tensor& grad_output) {
             ") does not match this layer's out_features (" + std::to_string(out_features_) + ")");
     }
 
-    std::vector<float> grad_z = grad_output.data_;
-    activation_backward(activation_, pre_activation_, grad_z);
-
     Tensor grad_input({in_features_});
+    std::mutex merge_mutex;
 
-    for (size_t o = 0; o < out_features_; ++o) {
-        float g = grad_z[o];
-        bias_.grad_[o] += g;
-        for (size_t i = 0; i < in_features_; ++i) {
-            weights_.grad_[i * out_features_ + o] += g * last_input_.at(i);
-            grad_input.at(i) += g * weights_.at(i * out_features_ + o);
+    // bias_.grad_[o] and weights_.grad_[i,o] are safe without locks (disjoint
+    // per-o writes). grad_input[i] is a *sum across all o*, so each thread
+    // accumulates its own local partial sum and merges once at the end,
+    // rather than locking on every single addition.
+    parallel_for(out_features_, [&](size_t start, size_t end) {
+        std::vector<float> local_grad_input(in_features_, 0.0f);
+
+        for (size_t o = start; o < end; ++o) {
+            float dz = grad_output.data_[o] *
+                       activation_derivative_scalar(activation_, pre_activation_[o]);
+            bias_.grad_[o] += dz;
+            for (size_t i = 0; i < in_features_; ++i) {
+                weights_.grad_[i * out_features_ + o] += dz * last_input_.data_[i];
+                local_grad_input[i] += dz * weights_.data_[i * out_features_ + o];
+            }
         }
-    }
+
+        std::lock_guard<std::mutex> lock(merge_mutex);
+        for (size_t i = 0; i < in_features_; ++i)
+            grad_input.data_[i] += local_grad_input[i];
+    });
+
     return grad_input;
 }
 
